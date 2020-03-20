@@ -1,0 +1,55 @@
+image: node:13.1
+
+stages:
+    - setup
+    - build
+    - test
+    - package
+
+node:install:
+    stage: setup
+    script:
+        - npm i
+    cache:
+        key: $CI_COMMIT_REF_SLUG
+        paths:
+            - node_modules/
+        policy: pull-push
+    artifacts:
+        paths:
+            - node_modules/
+
+build:
+    stage: build
+    script:
+        - npm run build
+    cache:
+        key: $CI_COMMIT_REF_SLUG
+        paths:
+            - node_modules/
+        policy: pull-push
+    artifacts:
+        paths:
+            - build/
+
+lint:
+    stage: test
+    script:
+        - npm run lint
+    cache:
+        key: $CI_COMMIT_REF_SLUG
+        paths:
+            - node_modules/
+        policy: pull-push
+
+package:
+    only:
+        - master
+    stage: package
+    script:
+        - echo "TODO"
+    cache:
+        key: $CI_COMMIT_REF_SLUG
+        paths:
+            - node_modules/
+        policy: pull-push
