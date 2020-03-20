@@ -6,3 +6,8 @@ Die ultimative Aufnahme App für Proffessoren und Dozenten.
 * Aufnahme.
 * Upload auf die covod Platform.
 * PDF Seitenerkennung mit Timestamp verlinkung. 
+
+### Maintainer
+* Louis
+* Michel
+* Luca
