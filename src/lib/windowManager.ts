@@ -19,6 +19,7 @@ class WindowManager {
         // Initialize window, when application is ready
         app.whenReady().then(() => {
             this.mainWindow = this.createWindow();
+            this.initializeMenu();
             $.log(this.mainWindow);
         });
 
@@ -33,6 +34,7 @@ class WindowManager {
         app.on("activate", () => {
             if (BrowserWindow.getAllWindows().length === 0) {
                 this.mainWindow = this.createWindow();
+                this.initializeMenu();
             }
         });
     }
@@ -42,13 +44,13 @@ class WindowManager {
      */
     private createWindow(): BrowserWindow {
         const win: BrowserWindow = new BrowserWindow({
-            width: 800,
+            resizable: false,
+            width: 1000,
             height: 600,
             webPreferences: {
                 nodeIntegration: true
             }
         });
-        this.initializeMenu();
         win.loadFile(path.join(rootDir, "./../public/index.html"));
         return win;
     }
@@ -82,7 +84,12 @@ class WindowManager {
                     {
                         label: "Toggle",
                         accelerator: "CmdOrCtrl+I",
-                        click: this.mainWindow.webContents.toggleDevTools
+                        click: () => {
+                            this.mainWindow.webContents.toggleDevTools();
+                        }
+                    },
+                    {
+                        role: "reload"
                     }
                 ]
             });
