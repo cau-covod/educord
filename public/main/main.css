@@ -1,4 +1,13 @@
+body {
+    background-color: #333 !important;
+}
+
 .btn {
     margin-left: 5px;
     margin-right: 5px;
+}
+
+#video-container {
+    display: block;
+    margin: auto;
 }
