@@ -1,6 +1,6 @@
 # EDUcord
 
-Die ultimative Aufnahme App für Proffessoren und Dozenten.
+Die ultimative Aufnahme App für Professoren und Dozenten.
 
 ### Features
 
