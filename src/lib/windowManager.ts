@@ -2,6 +2,7 @@ import { app, BrowserWindow, Menu } from "electron";
 import $ from "logsen";
 import path from "path";
 import { rootDir } from "./../index";
+import initFFMPEG from "./ffmpegManager";
 
 /**
  * Class for managing our windows.
@@ -20,6 +21,7 @@ class WindowManager {
         app.whenReady().then(() => {
             this.mainWindow = this.createWindow();
             this.initializeMenu();
+            initFFMPEG();
             $.log(this.mainWindow);
         });
 

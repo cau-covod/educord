@@ -16,8 +16,8 @@
   "author": "CAU vs Virus",
   "license": "ISC",
   "dependencies": {
-    "logsen": "^1.2.1",
-    "tslint-config-prettier": "^1.18.0"
+    "@ffmpeg/ffmpeg": "^0.6.1",
+    "logsen": "^1.2.1"
   },
   "devDependencies": {
     "@types/node": "^12.0.0",

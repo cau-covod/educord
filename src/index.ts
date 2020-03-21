@@ -1,3 +1,4 @@
+
 import windowManager from "./lib/windowManager";
 
 /**
