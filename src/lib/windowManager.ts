@@ -23,14 +23,14 @@ class WindowManager {
             $.log(this.mainWindow);
         });
 
-        // If on mac, dont close applicaiton, when all windows are closed
+        // If on mac, don't close applicaiton, when all windows are closed.
         app.on("window-all-closed", () => {
             if (process.platform !== "darwin") {
                 app.quit();
             }
         });
 
-        // When clicking on icon and all windows are closed, create a new main window
+        // When clicking on icon and all windows are closed, create a new main window.
         app.on("activate", () => {
             if (BrowserWindow.getAllWindows().length === 0) {
                 this.mainWindow = this.createWindow();
@@ -79,8 +79,9 @@ class WindowManager {
         // Add developer tools if not in production
         if (process.env.NODE_ENV !== "production") {
             mainMenuTemplate.push({
-                label: "Dev Tools",
+                label: "Dev Tools", // own menu item in bar.
                 submenu: [
+                    // the menus content.
                     {
                         label: "Toggle",
                         accelerator: "CmdOrCtrl+I",
@@ -89,16 +90,17 @@ class WindowManager {
                         }
                     },
                     {
+                        // reload role is basically "Reload" with CmdOrCtrl+R and reloads the window.
                         role: "reload"
                     }
                 ]
             });
         }
-        // If on MacOS, insert one element at the start of an array
+        // If on MacOS, insert one element at the start of an array.
         if (process.platform === "darwin") {
             mainMenuTemplate.unshift();
         }
-
+        // ! setMenu doesn't work on macOS.
         Menu.setApplicationMenu(Menu.buildFromTemplate(mainMenuTemplate));
     }
 }
