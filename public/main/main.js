@@ -198,4 +198,5 @@ function handleAudioDataAvailable(blob) {
  */
 ipcRenderer.on("video:encoded:send", (event, args) => {
     writeFileSync(args.fileName, Buffer.from(args.data));
+    console.log("File saved successfully!");
 });
