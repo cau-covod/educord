@@ -3,11 +3,15 @@ const { join } = require("path");
 const { tmpdir } = require("os");
 
 const { desktopCapturer, remote, ipcRenderer } = require("electron");
-const { Menu, dialog } = remote;
+const { dialog } = remote;
 
 const videoElement = document.querySelector("video");
 const recordBtn = document.getElementById("recordBtn");
-// const vidSelectBtn = document.getElementById("vidSelectBtn");
+const videoUploadBtn = document.getElementById("uploadBtn");
+videoUploadBtn.addEventListener("click", handleUploadClick);
+
+const selectPdfBtn = document.getElementById("selectPdfBtn");
+selectPdfBtn.addEventListener("click", handlePdfSelectClick);
 
 const PDF_VIEWER_WINDOW_TITEL = "EDUcord PDF Viewer";
 
@@ -208,3 +212,19 @@ ipcRenderer.on("video:encoded:send", (_event, args) => {
     });
     console.log("File saved successfully!");
 });
+
+/**
+ * Handle the click on the "Upload" button.
+ */
+function handleUploadClick(e) {
+    e.preventDefault();
+    ipcRenderer.send("window:upload:open");
+}
+
+/**
+ * Handle the click on the "select" button.
+ */
+function handlePdfSelectClick(e) {
+    e.preventDefault();
+    ipcRenderer.send("dialog:pdf:open");
+}

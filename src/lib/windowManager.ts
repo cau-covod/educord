@@ -5,6 +5,7 @@ import initFFMPEG from "./ffmpegManager";
 import loginManager from "./loginManager";
 import pdfManager from "./pdfManager";
 import recordingManager from "./recordingManager";
+import uploadManager from "./uploadManager";
 
 /**
  * Class for managing our windows.
@@ -119,12 +120,12 @@ class WindowManager {
                 ]
             },
             {
-                label: "File",
+                label: "Upload",
                 submenu: [
                     {
                         label: "Upload recording",
                         click(): void {
-                            // TODO
+                            uploadManager.openUploadWindow();
                         }
                     }
                 ]

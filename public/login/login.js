@@ -9,10 +9,10 @@ const alert = document.getElementById("wrong-login-alert");
 form.addEventListener("submit", (el, evt) => {
     el.preventDefault();
 
-    const $mail = document.getElementById("inputEmail");
+    const $username = document.getElementById("inputUsername");
     const $password = document.getElementById("inputPassword");
     ipcRenderer.send("login:submit", {
-        username: $mail.value,
+        username: $username.value,
         password: $password.value
     });
 });

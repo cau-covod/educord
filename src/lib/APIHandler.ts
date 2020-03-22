@@ -2,6 +2,7 @@ import { createReadStream } from "fs";
 import $ from "logsen";
 import { basename } from "path";
 import * as request from "request";
+import { TimeStamp } from "./recordingManager";
 
 export const API_VERSION = "v1";
 
@@ -39,13 +40,12 @@ export async function generateToken(username: string, password: string): Promise
         };
         request.post(options, (err, res, body) => {
             if (err) {
-                return $.log(err);
+                $.log(err);
             }
             const code = res.statusCode;
             $.log("Token Status:" + code);
             if (code === 200) {
                 apiToken = JSON.parse(body).access_token;
-                $.log(apiToken);
                 resolve(true);
             }
             resolve(false);
@@ -61,30 +61,34 @@ export async function generateToken(username: string, password: string): Promise
  * @param API_Token
  */
 // tslint:disable-next-line:variable-name
-export function uploadMedia(LectureID: number, mediaPath: string): void {
-    const options = {
-        method: "POST",
-        url: `${PROTOCOL}://${SERVER}${PORT}/api/${API_VERSION}/lecture/${LectureID}/media`,
-        headers: {
-            Authorization: `bearer ${apiToken}`
-        },
-        formData: {
-            file: {
-                value: createReadStream(mediaPath),
-                options: {
-                    filename: basename(mediaPath),
-                    contentType: null
+export async function uploadMedia(LectureID: number, mediaPath: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+        const options = {
+            method: "POST",
+            url: `${PROTOCOL}://${SERVER}${PORT}/api/${API_VERSION}/lecture/${LectureID}/media`,
+            headers: {
+                Authorization: `bearer ${apiToken}`
+            },
+            formData: {
+                file: {
+                    value: createReadStream(mediaPath),
+                    options: {
+                        filename: basename(mediaPath),
+                        contentType: null
+                    }
                 }
             }
-        }
-    };
+        };
 
-    request.post(options, (err, res, body) => {
-        if (err) {
-            return $.log(err);
-        }
-        $.log(`Status: ${res.statusCode}`);
-        $.log(body);
+        request.post(options, (err, res, body) => {
+            if (err) {
+                $.log(err);
+                reject();
+            }
+            $.log(`Status: ${res.statusCode}`);
+            $.log(body);
+            resolve();
+        });
     });
 }
 
@@ -96,30 +100,34 @@ export function uploadMedia(LectureID: number, mediaPath: string): void {
  * @param API_Token
  */
 // tslint:disable-next-line:variable-name
-export function uploadPDF(LectureID: number, pdfPath: string): void {
-    const options = {
-        method: "POST",
-        url: `${PROTOCOL}://${SERVER}${PORT}/api/${API_VERSION}/lecture/${LectureID}/pdf`,
-        headers: {
-            Authorization: `bearer ${apiToken}`
-        },
-        formData: {
-            file: {
-                value: createReadStream(pdfPath),
-                options: {
-                    filename: basename(pdfPath),
-                    contentType: null
+export async function uploadPDF(LectureID: number, pdfPath: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+        const options = {
+            method: "POST",
+            url: `${PROTOCOL}://${SERVER}${PORT}/api/${API_VERSION}/lecture/${LectureID}/pdf`,
+            headers: {
+                Authorization: `bearer ${apiToken}`
+            },
+            formData: {
+                file: {
+                    value: createReadStream(pdfPath),
+                    options: {
+                        filename: basename(pdfPath),
+                        contentType: null
+                    }
                 }
             }
-        }
-    };
+        };
 
-    request.post(options, (err, res, body) => {
-        if (err) {
-            return $.log(err);
-        }
-        $.log(`Status: ${res.statusCode}`);
-        $.log(body);
+        request.post(options, (err, res, body) => {
+            if (err) {
+                $.log(err);
+                reject();
+            }
+            $.log(`Status: ${res.statusCode}`);
+            $.log(body);
+            resolve();
+        });
     });
 }
 
@@ -130,24 +138,27 @@ export function uploadPDF(LectureID: number, pdfPath: string): void {
  * @param API_Token
  */
 // tslint:disable-next-line:variable-name
-export function uploadTimestamps(LectureID: number, timestamps: string): void {
-    const options = {
-        method: "POST",
-        url: `${PROTOCOL}://${SERVER}${PORT}/api/${API_VERSION}/lecture/${LectureID}/timestamps`,
-        headers: {
-            Authorization: `bearer ${apiToken}`
-        },
-        formData: {
-            timestamps
-        }
-    };
+export async function uploadTimestamps(LectureID: number, timestamps: TimeStamp[]): Promise<void> {
+    return new Promise((resolve, reject) => {
+        const options = {
+            method: "POST",
+            url: `${PROTOCOL}://${SERVER}${PORT}/api/${API_VERSION}/lecture/${LectureID}/timestamps`,
+            headers: {
+                Authorization: `bearer ${apiToken}`
+            },
+            json: true,
+            body: timestamps
+        };
 
-    request.post(options, (err, res, body) => {
-        if (err) {
-            return $.log(err);
-        }
-        $.log(`Status: ${res.statusCode}`);
-        $.log(body);
+        request.post(options, (err, res, body) => {
+            if (err) {
+                $.log(err);
+                reject();
+            }
+            $.log(`Status: ${res.statusCode}`);
+            $.log(body);
+            resolve();
+        });
     });
 }
 
@@ -169,7 +180,7 @@ export async function checkToken(apiToken: string): Promise<boolean> {
 
         request.post(options, (err, res, body) => {
             if (err) {
-                return $.log(err);
+                $.log(err);
             }
             $.log(`Status: ${res.statusCode}`);
             $.log(body);
@@ -193,15 +204,14 @@ export async function checkToken(apiToken: string): Promise<boolean> {
  * @return lecureID
  */
 // tslint:disable-next-line:variable-name
-export async function addLecture(course_id: number, number: number, name: string): Promise<string> {
-    return new Promise(resolve => {
-        $.log(apiToken);
+export async function addLecture(course_id: number, number: number, name: string): Promise<number> {
+    return new Promise((resolve, reject) => {
         const options = {
             method: "PUT",
             json: true,
             url: `${PROTOCOL}://${SERVER}${PORT}/api/${API_VERSION}/lecture/0`,
             headers: {
-                Authorization: `bearer 9oHi75e5ApadMSZ4jKBWv5U8XOT6Dnj9BwFkcN2djp`,
+                Authorization: `bearer ${apiToken}`,
                 contentType: "application/json"
             },
             body: { course_id, number, name }
@@ -209,7 +219,8 @@ export async function addLecture(course_id: number, number: number, name: string
 
         request.put(options, (err, res, body) => {
             if (err) {
-                return $.log(err);
+                $.log(err);
+                reject();
             }
             $.log(`Status: ${res.statusCode}`);
             resolve(body.id);
