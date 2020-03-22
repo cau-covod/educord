@@ -1,6 +1,7 @@
 import { ipcMain, IpcMainEvent } from "electron";
 import { generateToken } from "./APIHandler";
 import pdfManager from "./pdfManager";
+import windowManager from "./windowManager";
 
 /**
  * Class for managing the login process.
@@ -26,6 +27,7 @@ class LoginManager {
             evt.sender.send("login:response", {
                 success: true
             });
+            windowManager.setRealMainMenu();
         } else {
             // tell if pw or user was false.
             evt.sender.send("login:response", {
