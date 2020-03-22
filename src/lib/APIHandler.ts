@@ -2,14 +2,13 @@ import { createReadStream } from "fs";
 import $ from "logsen";
 import { basename } from "path";
 import * as request from "request";
-import { contentTracing } from "electron";
 
 export const API_VERSION = "v1";
 
 const SERVER = "covod.bre4k3r.de";
-const PORT = "22022"; // ${PROTOCOL} port.
+const PORT = ""; // ${PROTOCOL} port. Mit doppelpunkt
 
-const PROTOCOL = "http";
+const PROTOCOL = "https";
 
 // tslint:disable-next-line:no-var-keyword
 var apiToken: string;
@@ -28,7 +27,7 @@ export async function generateToken(username: string, password: string): Promise
     return new Promise(resolve => {
         const options = {
             method: "POST",
-            url: `${PROTOCOL}://${SERVER}:${PORT}/oauth2/token`,
+            url: `${PROTOCOL}://${SERVER}${PORT}/oauth2/token`,
             formData: {
                 grant_type: "password",
                 client_id: CLIENT_ID,
@@ -65,7 +64,7 @@ export async function generateToken(username: string, password: string): Promise
 export function uploadMedia(LectureID: number, mediaPath: string): void {
     const options = {
         method: "POST",
-        url: `${PROTOCOL}://${SERVER}:${PORT}/api/${API_VERSION}/lecture/${LectureID}/media`,
+        url: `${PROTOCOL}://${SERVER}${PORT}/api/${API_VERSION}/lecture/${LectureID}/media`,
         headers: {
             Authorization: `bearer ${apiToken}`
         },
@@ -100,7 +99,7 @@ export function uploadMedia(LectureID: number, mediaPath: string): void {
 export function uploadPDF(LectureID: number, pdfPath: string): void {
     const options = {
         method: "POST",
-        url: `${PROTOCOL}://${SERVER}:${PORT}/api/${API_VERSION}/lecture/${LectureID}/pdf`,
+        url: `${PROTOCOL}://${SERVER}${PORT}/api/${API_VERSION}/lecture/${LectureID}/pdf`,
         headers: {
             Authorization: `bearer ${apiToken}`
         },
@@ -134,7 +133,7 @@ export function uploadPDF(LectureID: number, pdfPath: string): void {
 export function uploadTimestamps(LectureID: number, timestamps: string): void {
     const options = {
         method: "POST",
-        url: `${PROTOCOL}://${SERVER}:${PORT}/api/${API_VERSION}/lecture/${LectureID}/timestamps`,
+        url: `${PROTOCOL}://${SERVER}${PORT}/api/${API_VERSION}/lecture/${LectureID}/timestamps`,
         headers: {
             Authorization: `bearer ${apiToken}`
         },
@@ -162,7 +161,7 @@ export async function checkToken(apiToken: string): Promise<boolean> {
     return new Promise(resolve => {
         const options = {
             method: "POST",
-            url: `${PROTOCOL}://${SERVER}:${PORT}/oauth2/check_token`,
+            url: `${PROTOCOL}://${SERVER}${PORT}/oauth2/check_token`,
             headers: {
                 Authorization: `bearer ${apiToken}`
             }
@@ -194,17 +193,18 @@ export async function checkToken(apiToken: string): Promise<boolean> {
  * @return lecureID
  */
 // tslint:disable-next-line:variable-name
-export async function addLecture(courseid: number, number: number, name: string): Promise<string> {
+export async function addLecture(course_id: number, number: number, name: string): Promise<string> {
     return new Promise(resolve => {
         $.log(apiToken);
         const options = {
             method: "PUT",
-            url: `${PROTOCOL}://${SERVER}:${PORT}/api/${API_VERSION}/lecture/0`,
+            json: true,
+            url: `${PROTOCOL}://${SERVER}${PORT}/api/${API_VERSION}/lecture/0`,
             headers: {
                 Authorization: `bearer 9oHi75e5ApadMSZ4jKBWv5U8XOT6Dnj9BwFkcN2djp`,
                 contentType: "application/json"
             },
-            body: JSON.stringify({ courseid, number, name })
+            body: { course_id, number, name }
         };
 
         request.put(options, (err, res, body) => {
@@ -212,8 +212,7 @@ export async function addLecture(courseid: number, number: number, name: string)
                 return $.log(err);
             }
             $.log(`Status: ${res.statusCode}`);
-            $.log(body);
-            resolve("test");
+            resolve(body.id);
         });
     });
 }
