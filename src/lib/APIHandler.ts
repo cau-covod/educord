@@ -3,16 +3,15 @@ import $ from "logsen";
 import { basename } from "path";
 import * as request from "request";
 
-// TODO fill out
 export const API_VERSION = "v1";
 
-const SERVER = "covod.bre4k3r.de"; // put server domain here.
-// export const SERVER = "localhost";
-const PORT = "22022"; // ${PROTOCOL} port.
+const SERVER = "covod.bre4k3r.de";
+const PORT = ""; // ${PROTOCOL} port. Mit doppelpunkt
 
-const PROTOCOL = "http";
+const PROTOCOL = "https";
 
-let apiToken: string;
+// tslint:disable-next-line:no-var-keyword
+var apiToken: string;
 
 //  we should get another one for our app.
 const CLIENT_ID = "PPDPDvXf7bkd5bDLVhttUIxn";
@@ -28,7 +27,7 @@ export async function generateToken(username: string, password: string): Promise
     return new Promise(resolve => {
         const options = {
             method: "POST",
-            url: `${PROTOCOL}://${SERVER}:${PORT}/oauth2/token`,
+            url: `${PROTOCOL}://${SERVER}${PORT}/oauth2/token`,
             formData: {
                 grant_type: "password",
                 client_id: CLIENT_ID,
@@ -43,9 +42,10 @@ export async function generateToken(username: string, password: string): Promise
                 return $.log(err);
             }
             const code = res.statusCode;
-            $.log("Status:" + code);
+            $.log("Token Status:" + code);
             if (code === 200) {
-                apiToken = body.access_token;
+                apiToken = JSON.parse(body).access_token;
+                $.log(apiToken);
                 resolve(true);
             }
             resolve(false);
@@ -64,7 +64,7 @@ export async function generateToken(username: string, password: string): Promise
 export function uploadMedia(LectureID: number, mediaPath: string): void {
     const options = {
         method: "POST",
-        url: `${PROTOCOL}://${SERVER}:${PORT}/api/${API_VERSION}/lecture/${LectureID}/media`,
+        url: `${PROTOCOL}://${SERVER}${PORT}/api/${API_VERSION}/lecture/${LectureID}/media`,
         headers: {
             Authorization: `bearer ${apiToken}`
         },
@@ -99,7 +99,7 @@ export function uploadMedia(LectureID: number, mediaPath: string): void {
 export function uploadPDF(LectureID: number, pdfPath: string): void {
     const options = {
         method: "POST",
-        url: `${PROTOCOL}://${SERVER}:${PORT}/api/${API_VERSION}/lecture/${LectureID}/pdf`,
+        url: `${PROTOCOL}://${SERVER}${PORT}/api/${API_VERSION}/lecture/${LectureID}/pdf`,
         headers: {
             Authorization: `bearer ${apiToken}`
         },
@@ -130,12 +130,12 @@ export function uploadPDF(LectureID: number, pdfPath: string): void {
  * @param API_Token
  */
 // tslint:disable-next-line:variable-name
-export function uploadTimestamps(LectureID: number, timestamps: string, API_Token: string): void {
+export function uploadTimestamps(LectureID: number, timestamps: string): void {
     const options = {
         method: "POST",
-        url: `${PROTOCOL}://${SERVER}:${PORT}/api/${API_VERSION}/lecture/${LectureID}/timestamps`,
+        url: `${PROTOCOL}://${SERVER}${PORT}/api/${API_VERSION}/lecture/${LectureID}/timestamps`,
         headers: {
-            Authorization: `bearer ${API_Token}`
+            Authorization: `bearer ${apiToken}`
         },
         formData: {
             timestamps
@@ -157,13 +157,13 @@ export function uploadTimestamps(LectureID: number, timestamps: string, API_Toke
  * @return validity of token. Promise<boolean>
  */
 // tslint:disable-next-line:variable-name
-export async function checkToken(API_Token: string): Promise<boolean> {
+export async function checkToken(apiToken: string): Promise<boolean> {
     return new Promise(resolve => {
         const options = {
             method: "POST",
-            url: `${PROTOCOL}://${SERVER}:${PORT}/oauth2/check_token`,
+            url: `${PROTOCOL}://${SERVER}${PORT}/oauth2/check_token`,
             headers: {
-                Authorization: `bearer ${API_Token}`
+                Authorization: `bearer ${apiToken}`
             }
         };
 
@@ -184,27 +184,35 @@ export async function checkToken(API_Token: string): Promise<boolean> {
 
 /**
  * Add lecture.
+ *
  * @param courseid
  * @param number of lecture
  * @param name titel of lecture
  * @param API_Token
+ *
+ * @return lecureID
  */
 // tslint:disable-next-line:variable-name
-export function addLecture(courseid: number, number: number, name: string, API_Token: string): void {
-    const options = {
-        method: "PUT",
-        url: `${PROTOCOL}://${SERVER}:${PORT}/api/${API_VERSION}/lecture`,
-        headers: {
-            Authorization: `bearer ${API_Token}`
-        },
-        body: JSON.stringify({ courseid, number, name })
-    };
+export async function addLecture(course_id: number, number: number, name: string): Promise<string> {
+    return new Promise(resolve => {
+        $.log(apiToken);
+        const options = {
+            method: "PUT",
+            json: true,
+            url: `${PROTOCOL}://${SERVER}${PORT}/api/${API_VERSION}/lecture/0`,
+            headers: {
+                Authorization: `bearer 9oHi75e5ApadMSZ4jKBWv5U8XOT6Dnj9BwFkcN2djp`,
+                contentType: "application/json"
+            },
+            body: { course_id, number, name }
+        };
 
-    request.post(options, (err, res, body) => {
-        if (err) {
-            return $.log(err);
-        }
-        $.log(`Status: ${res.statusCode}`);
-        $.log(body);
+        request.put(options, (err, res, body) => {
+            if (err) {
+                return $.log(err);
+            }
+            $.log(`Status: ${res.statusCode}`);
+            resolve(body.id);
+        });
     });
 }
