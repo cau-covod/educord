@@ -3,7 +3,7 @@ const packager = require("electron-packager");
 
 const options = {
     appBundleId: "EDUcord",
-    arch: ["x64", "ia32"],
+    arch: ["x64"],
     dir: ".",
     icon: __dirname + "/../img/icon.icns",
     executableName: "EDUcord",

@@ -1,8 +1,12 @@
+<html>
+
 <head>
     <link rel="stylesheet" type="text/css" href="login.css">
     <link rel="stylesheet" href="../lib/bootstrap/css/bootstrap.css">
     <script src="../lib/bootstrap/js/bootstrap.js"></script>
+    <script defer src="./login.js"></script>
 </head>
+
 <body>
     <div class="container-fluid">
         <div class="row no-gutter">
@@ -13,22 +17,22 @@
                         <div class="row">
                             <div class="col-md-9 col-lg-8 mx-auto">
                                 <h3 class="login-heading mb-4">Willkommen im H&ouml;rsaal!</h3>
-                                <form>
+                                <form id="login-form">
                                     <div class="form-label-group">
-                                        <input type="email" id="inputEmail" class="form-control" placeholder="Email address"
-                                            required autofocus>
+                                        <input type="email" id="inputEmail" class="form-control"
+                                            placeholder="Email address" autofocus>
                                         <label for="inputEmail">Email address</label>
                                     </div>
 
                                     <div class="form-label-group">
                                         <input type="password" id="inputPassword" class="form-control"
-                                            placeholder="Password" required>
+                                            placeholder="Password">
                                         <label for="inputPassword">Password</label>
                                     </div>
-                                     <button
-                                         class="btn btn-lg btn-primary btn-block btn-login text-uppercase font-weight-bold mb-2"
-                                         type="submit">Anmelden</button>
-                                     <div class="text-center">
+                                    <button
+                                        class="btn btn-lg btn-primary btn-block btn-login text-uppercase font-weight-bold mb-2"
+                                        type="submit">Anmelden</button>
+                                    <!-- <div class="text-center"> -->
                                     <!---
                                     <div class="custom-control custom-checkbox mb-3">
                                         <input type="checkbox" class="custom-control-input" id="customCheck1">
@@ -43,3 +47,5 @@
         </div>
     </div>
 </body>
+
+</html>

@@ -1,8 +1,8 @@
 import { app, BrowserWindow, Menu } from "electron";
-import $ from "logsen";
 import path from "path";
 import { rootDir } from "./../index";
 import initFFMPEG from "./ffmpegManager";
+import loginManager from "./loginManager";
 import pdfManager from "./pdfManager";
 import recordingManager from "./recordingManager";
 
@@ -21,35 +21,17 @@ class WindowManager {
     public start(): void {
         // Initialize window, when application is ready
         app.whenReady().then(() => {
-            pdfManager.loadPDF();
             this.mainWindow = this.createWindow();
+            loginManager.init();
 
             this.mainWindow.on("closed", () => {
-                process.exit(0);
+                app.quit();
             });
 
             this.initializeMenu();
             initFFMPEG();
             recordingManager.init();
-
-            $.log(this.mainWindow);
         });
-
-        // TODO: Remove me
-        // // If on mac, don't close applicaiton, when all windows are closed.
-        // app.on("window-all-closed", () => {
-        //     if (process.platform !== "darwin") {
-        //         app.quit();
-        //     }
-        // });
-
-        // // When clicking on icon and all windows are closed, create a new main window.
-        // app.on("activate", () => {
-        //     if (BrowserWindow.getAllWindows().length === 0) {
-        //         this.mainWindow = this.createWindow();
-        //         this.initializeMenu();
-        //     }
-        // });
     }
 
     /**
@@ -64,7 +46,7 @@ class WindowManager {
                 nodeIntegration: true
             }
         });
-        win.loadFile(path.join(rootDir, "./../public/index.html"));
+        win.loadFile(path.join(rootDir, "./../public/login/login.html"));
         return win;
     }
 
@@ -77,13 +59,25 @@ class WindowManager {
         // Store menu-template in any-array, so we can add an empty object for MacOS
         const mainMenuTemplate: any[] = [
             {
-                label: app.getName(),
+                label: app.name,
                 submenu: [
                     {
                         label: "Quit",
                         accelerator: "CmdOrCtrl + Q",
                         click(): void {
                             app.quit();
+                        }
+                    }
+                ]
+            },
+            {
+                label: "PDF",
+                submenu: [
+                    {
+                        label: "Open",
+                        accelerator: "CmdOrCtrl + O",
+                        click(): void {
+                            pdfManager.selectPDF();
                         }
                     }
                 ]
@@ -111,7 +105,9 @@ class WindowManager {
         }
         // If on MacOS, insert one element at the start of an array.
         if (process.platform === "darwin") {
-            mainMenuTemplate.unshift();
+            mainMenuTemplate.unshift({
+                label: "The Unseen"
+            });
         }
         Menu.setApplicationMenu(Menu.buildFromTemplate(mainMenuTemplate));
     }

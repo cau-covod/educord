@@ -22,49 +22,39 @@ let audioRecorder;
 // Blob for saving recorded audio
 let globalAudioBlob;
 
+selectPdfWindowAsSource();
+
 // Function for sleeping
-async function sleep() {
+async function sleep(timeout = 1) {
     return new Promise(resolve => {
-        setTimeout(resolve, 1);
+        setTimeout(resolve, timeout);
     });
 }
 
 /**
- * Get all the video sources
- * @deprecated
+ * Select the PDF-Viewer as source.
  */
-// TODO: Remove me
-async function getVideoSources() {
-    const inputSources = await desktopCapturer.getSources({
-        types: ["window", "screen"]
-    });
-
-    // Build the menu with video sources
-    const videoOptionsMenu = Menu.buildFromTemplate(
-        inputSources.map(src => {
-            return {
-                label: src.name,
-                click: () => selectSource(src)
-            };
-        })
-    );
-    console.log(inputSources.filter(src => src.name === PDF_VIEWER_WINDOW_TITEL));
-    videoOptionsMenu.popup();
-}
-
-selectPdfWindowAsSource();
 async function selectPdfWindowAsSource() {
-    const inputSources = await desktopCapturer.getSources({
-        types: ["window"]
-    });
-    selectSource(inputSources.filter(src => src.name === PDF_VIEWER_WINDOW_TITEL)[0]);
+    let pdfWindow;
+
+    // While we cannot get a valid source, wait and try again.
+    do {
+        const inputSources = await desktopCapturer.getSources({
+            types: ["window"]
+        });
+        pdfWindow = inputSources.filter(src => src.name === PDF_VIEWER_WINDOW_TITEL)[0];
+        await sleep(500);
+    } while (!pdfWindow);
+    selectSource(pdfWindow);
 }
 
 /**
  * Select a source for recording and setup MediaRecorder.
  */
 async function selectSource(src) {
-    // vidSelectBtn.innerText = src.name;
+    if (!src) {
+        return;
+    }
 
     // Constraints for the video-capturing
     const videoConstrains = {
