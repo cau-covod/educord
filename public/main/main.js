@@ -4,16 +4,15 @@ const { tmpdir } = require("os");
 
 const { desktopCapturer, remote, ipcRenderer } = require("electron");
 const { Menu, dialog } = remote;
-// const ffmpeg = require("ffmpeg");
-
-const { createWorker } = require("@ffmpeg/ffmpeg");
 
 const videoElement = document.querySelector("video");
 const recordBtn = document.getElementById("recordBtn");
-const vidSelectBtn = document.getElementById("vidSelectBtn");
+// const vidSelectBtn = document.getElementById("vidSelectBtn");
+
+const PDF_VIEWER_WINDOW_TITEL = "EDUcord PDF Viewer";
 
 // Attach function to events
-vidSelectBtn.onclick = getVideoSources;
+// vidSelectBtn.onclick = getVideoSources;
 recordBtn.onclick = handleRecordClick;
 
 // Recorders for audio and video sources
@@ -32,7 +31,9 @@ async function sleep() {
 
 /**
  * Get all the video sources
+ * @deprecated
  */
+// TODO: Remove me
 async function getVideoSources() {
     const inputSources = await desktopCapturer.getSources({
         types: ["window", "screen"]
@@ -47,14 +48,23 @@ async function getVideoSources() {
             };
         })
     );
+    console.log(inputSources.filter(src => src.name === PDF_VIEWER_WINDOW_TITEL));
     videoOptionsMenu.popup();
+}
+
+selectPdfWindowAsSource();
+async function selectPdfWindowAsSource() {
+    const inputSources = await desktopCapturer.getSources({
+        types: ["window"]
+    });
+    selectSource(inputSources.filter(src => src.name === PDF_VIEWER_WINDOW_TITEL)[0]);
 }
 
 /**
  * Select a source for recording and setup MediaRecorder.
  */
 async function selectSource(src) {
-    vidSelectBtn.innerText = src.name;
+    // vidSelectBtn.innerText = src.name;
 
     // Constraints for the video-capturing
     const videoConstrains = {
@@ -113,6 +123,7 @@ function handleRecordClick(e) {
 
     // Change text in button and start or stop the recording
     if (mediaRecorder.state !== "recording") {
+        ipcRenderer.send("recording:start");
         globalAudioBlob = null;
         recordBtn.innerText = "Aufnahme stoppen";
         mediaRecorder.start();
@@ -132,6 +143,10 @@ function handleRecordClick(e) {
 async function handleVideoDataAvailable(e) {
     // Get Timestamp for temp-video-saving
     const timeStamp = Date.now();
+
+    ipcRenderer.send("recording:stop", {
+        timeStamp
+    });
 
     // Generate MP4-Blob
     const videoBlob = new Blob([e.data], {
@@ -196,7 +211,10 @@ function handleAudioDataAvailable(blob) {
 /**
  * Handle the receiving of encoded video data.
  */
-ipcRenderer.on("video:encoded:send", (event, args) => {
+ipcRenderer.on("video:encoded:send", (_event, args) => {
     writeFileSync(args.fileName, Buffer.from(args.data));
+    ipcRenderer.send("recording:saved", {
+        fileName: args.fileName
+    });
     console.log("File saved successfully!");
 });

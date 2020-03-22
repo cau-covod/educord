@@ -42,12 +42,31 @@ lint:
             - node_modules/
         policy: pull-push
 
-package:
+package:linux:
     only:
         - master
+    tags:
+        - deploy
     stage: package
     script:
-        - node script/package-linux.js
+        - npm run pack:linux
+    cache:
+        key: $CI_COMMIT_REF_SLUG
+        paths:
+            - node_modules/
+        policy: pull-push
+    artifacts:
+        paths:
+            - package/
+
+package:mac:
+    only:
+        - master
+    tags:
+        - deploy
+    stage: package
+    script:
+        - npm run pack:mac
     cache:
         key: $CI_COMMIT_REF_SLUG
         paths:

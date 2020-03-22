@@ -3,6 +3,8 @@ import $ from "logsen";
 import path from "path";
 import { rootDir } from "./../index";
 import initFFMPEG from "./ffmpegManager";
+import pdfManager from "./pdfManager";
+import recordingManager from "./recordingManager";
 
 /**
  * Class for managing our windows.
@@ -19,26 +21,35 @@ class WindowManager {
     public start(): void {
         // Initialize window, when application is ready
         app.whenReady().then(() => {
+            pdfManager.loadPDF();
             this.mainWindow = this.createWindow();
+
+            this.mainWindow.on("closed", () => {
+                process.exit(0);
+            });
+
             this.initializeMenu();
             initFFMPEG();
+            recordingManager.init();
+
             $.log(this.mainWindow);
         });
 
-        // If on mac, don't close applicaiton, when all windows are closed.
-        app.on("window-all-closed", () => {
-            if (process.platform !== "darwin") {
-                app.quit();
-            }
-        });
+        // TODO: Remove me
+        // // If on mac, don't close applicaiton, when all windows are closed.
+        // app.on("window-all-closed", () => {
+        //     if (process.platform !== "darwin") {
+        //         app.quit();
+        //     }
+        // });
 
-        // When clicking on icon and all windows are closed, create a new main window.
-        app.on("activate", () => {
-            if (BrowserWindow.getAllWindows().length === 0) {
-                this.mainWindow = this.createWindow();
-                this.initializeMenu();
-            }
-        });
+        // // When clicking on icon and all windows are closed, create a new main window.
+        // app.on("activate", () => {
+        //     if (BrowserWindow.getAllWindows().length === 0) {
+        //         this.mainWindow = this.createWindow();
+        //         this.initializeMenu();
+        //     }
+        // });
     }
 
     /**
@@ -102,7 +113,6 @@ class WindowManager {
         if (process.platform === "darwin") {
             mainMenuTemplate.unshift();
         }
-        // ! setMenu doesn't work on macOS.
         Menu.setApplicationMenu(Menu.buildFromTemplate(mainMenuTemplate));
     }
 }
