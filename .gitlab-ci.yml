@@ -41,39 +41,38 @@ lint:
         paths:
             - node_modules/
         policy: pull-push
+# package:linux:
+#     only:
+#         - master
+#     stage: package
+#     script:
+#         - apt-get update && apt-get install zip
+#         - npm run pack:linux
+#         - cd package
+#         - zip -9 -r linux.zip educord-linux-*
+#     cache:
+#         key: $CI_COMMIT_REF_SLUG
+#         paths:
+#             - node_modules/
+#         policy: pull-push
+#     artifacts:
+#         paths:
+#             - package/linux.zip
 
-package:linux:
-    only:
-        - master
-    stage: package
-    script:
-        - apt-get update && apt-get install zip
-        - npm run pack:linux
-        - cd package
-        - zip -9 -r linux.zip educord-linux-*
-    cache:
-        key: $CI_COMMIT_REF_SLUG
-        paths:
-            - node_modules/
-        policy: pull-push
-    artifacts:
-        paths:
-            - package/linux.zip
-
-package:mac:
-    only:
-        - master
-    stage: package
-    script:
-        - apt-get update && apt-get install zip
-        - npm run pack:mac
-        - cd package
-        - zip -9 -r mac.zip educord-darwin-*
-    cache:
-        key: $CI_COMMIT_REF_SLUG
-        paths:
-            - node_modules/
-        policy: pull-push
-    artifacts:
-        paths:
-            - package/mac.zip
+# package:mac:
+#     only:
+#         - master
+#     stage: package
+#     script:
+#         - apt-get update && apt-get install zip
+#         - npm run pack:mac
+#         - cd package
+#         - zip -9 -r mac.zip educord-darwin-*
+#     cache:
+#         key: $CI_COMMIT_REF_SLUG
+#         paths:
+#             - node_modules/
+#         policy: pull-push
+#     artifacts:
+#         paths:
+#             - package/mac.zip

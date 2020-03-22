@@ -1,4 +1,5 @@
 import { ipcMain, IpcMainEvent } from "electron";
+import { generateToken } from "./APIHandler";
 import pdfManager from "./pdfManager";
 
 /**
@@ -6,7 +7,8 @@ import pdfManager from "./pdfManager";
  */
 class LoginManager {
     constructor() {
-        ipcMain.on("login:submit", this.onLoginSubmit.bind(this));
+        // Bind login event.
+        ipcMain.on("login:submit", this.handleLoginSubmit.bind(this));
     }
 
     public init(): LoginManager {
@@ -14,17 +16,22 @@ class LoginManager {
     }
 
     /**
-     * Handle the login-event.
+     * Handle login event.
      */
-    private async onLoginSubmit(evt: IpcMainEvent, _arg: any): Promise<void> {
-        // TODO: Implement OAuth und so
-        // if (arg) {
-        // pdfManager.loadPDF();
-        pdfManager.selectPDF();
-        evt.sender.send("login:response", {
-            success: true
-        });
-        // }
+    private async handleLoginSubmit(evt: IpcMainEvent, credentials: any): Promise<void> {
+        const res = await generateToken(credentials.username, credentials.password);
+        if (res) {
+            // pdfManager.loadPDF();
+            pdfManager.selectPDF();
+            evt.sender.send("login:response", {
+                success: true
+            });
+        } else {
+            // tell if pw or user was false.
+            evt.sender.send("login:response", {
+                success: false
+            });
+        }
     }
 }
 

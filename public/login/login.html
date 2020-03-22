@@ -17,16 +17,19 @@
                         <div class="row">
                             <div class="col-md-9 col-lg-8 mx-auto">
                                 <h3 class="login-heading mb-4">Willkommen im H&ouml;rsaal!</h3>
+                                <div id="wrong-login-alert" class="alert alert-danger" role="alert">
+                                    Wrong username or password!
+                                </div>
                                 <form id="login-form">
                                     <div class="form-label-group">
-                                        <input type="email" id="inputEmail" class="form-control"
-                                            placeholder="Email address" autofocus>
+                                        <input type="text" id="inputEmail" class="form-control"
+                                            placeholder="Email address" autofocus required>
                                         <label for="inputEmail">Email address</label>
                                     </div>
 
                                     <div class="form-label-group">
                                         <input type="password" id="inputPassword" class="form-control"
-                                            placeholder="Password">
+                                            placeholder="Password" required>
                                         <label for="inputPassword">Password</label>
                                     </div>
                                     <button
