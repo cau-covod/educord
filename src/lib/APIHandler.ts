@@ -2,17 +2,17 @@ import { createReadStream } from "fs";
 import $ from "logsen";
 import { basename } from "path";
 import * as request from "request";
+import { contentTracing } from "electron";
 
-// TODO fill out
 export const API_VERSION = "v1";
 
-const SERVER = "covod.bre4k3r.de"; // put server domain here.
-// export const SERVER = "localhost";
+const SERVER = "covod.bre4k3r.de";
 const PORT = "22022"; // ${PROTOCOL} port.
 
 const PROTOCOL = "http";
 
-let apiToken: string;
+// tslint:disable-next-line:no-var-keyword
+var apiToken: string;
 
 //  we should get another one for our app.
 const CLIENT_ID = "PPDPDvXf7bkd5bDLVhttUIxn";
@@ -43,9 +43,10 @@ export async function generateToken(username: string, password: string): Promise
                 return $.log(err);
             }
             const code = res.statusCode;
-            $.log("Status:" + code);
+            $.log("Token Status:" + code);
             if (code === 200) {
-                apiToken = body.access_token;
+                apiToken = JSON.parse(body).access_token;
+                $.log(apiToken);
                 resolve(true);
             }
             resolve(false);
@@ -195,16 +196,18 @@ export async function checkToken(apiToken: string): Promise<boolean> {
 // tslint:disable-next-line:variable-name
 export async function addLecture(courseid: number, number: number, name: string): Promise<string> {
     return new Promise(resolve => {
+        $.log(apiToken);
         const options = {
             method: "PUT",
-            url: `${PROTOCOL}://${SERVER}:${PORT}/api/${API_VERSION}/lecture`,
+            url: `${PROTOCOL}://${SERVER}:${PORT}/api/${API_VERSION}/lecture/0`,
             headers: {
-                Authorization: `bearer ${apiToken}`
+                Authorization: `bearer 9oHi75e5ApadMSZ4jKBWv5U8XOT6Dnj9BwFkcN2djp`,
+                contentType: "application/json"
             },
             body: JSON.stringify({ courseid, number, name })
         };
 
-        request.post(options, (err, res, body) => {
+        request.put(options, (err, res, body) => {
             if (err) {
                 return $.log(err);
             }
@@ -214,7 +217,7 @@ export async function addLecture(courseid: number, number: number, name: string)
         });
     });
 }
-/*
-generateToken("test", "passwort");
-addLecture(1, 1, "Paul der Käfer geht spazieren.");
-*/
+
+// generateToken("test", "passwort");
+// $.log(apiToken);
+addLecture(1, 2, "Paul der Käfer geht spazieren.");
