@@ -5,9 +5,10 @@ const options = {
     appBundleId: "EDUcord",
     arch: ["x64", "ia32"],
     dir: ".",
+    icon: __dirname + "/../img/icon.icns",
     executableName: "EDUCord",
     out: "./package",
-    platform: ["linux"],
+    platform: ["darwin"],
     overwrite: true
 };
 
