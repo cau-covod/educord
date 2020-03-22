@@ -69,6 +69,65 @@ class WindowManager {
                         }
                     }
                 ]
+            }
+        ];
+        // Add developer tools if not in production
+        if (process.env.NODE_ENV !== "production") {
+            mainMenuTemplate.push({
+                label: "Dev Tools", // own menu item in bar.
+                submenu: [
+                    // the menus content.
+                    {
+                        label: "Toggle",
+                        accelerator: "CmdOrCtrl+I",
+                        click: () => {
+                            this.mainWindow.webContents.toggleDevTools();
+                        }
+                    },
+                    {
+                        // reload role is basically "Reload" with CmdOrCtrl+R and reloads the window.
+                        role: "reload"
+                    }
+                ]
+            });
+        }
+        // If on MacOS, insert one element at the start of an array.
+        if (process.platform === "darwin") {
+            mainMenuTemplate.unshift({
+                label: "The Unseen"
+            });
+        }
+        Menu.setApplicationMenu(Menu.buildFromTemplate(mainMenuTemplate));
+    }
+
+    /**
+     * Set menu after login.
+     */
+    public setRealMainMenu(): void {
+        // Store menu-template in any-array, so we can add an empty object for MacOS
+        const mainMenuTemplate: any[] = [
+            {
+                label: app.name,
+                submenu: [
+                    {
+                        label: "Quit",
+                        accelerator: "CmdOrCtrl + Q",
+                        click(): void {
+                            app.quit();
+                        }
+                    }
+                ]
+            },
+            {
+                label: "File",
+                submenu: [
+                    {
+                        label: "Upload recording",
+                        click(): void {
+                            // TODO
+                        }
+                    }
+                ]
             },
             {
                 label: "PDF",
