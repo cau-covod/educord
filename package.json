@@ -9,7 +9,9 @@
     "build:start": "npm run build && npm run start",
     "lint": "tslint --project .",
     "pack:linux": "node ./scripts/package-linux.js",
-    "pack:mac": "node ./scripts/package-mac.js"
+    "pack:mac": "node ./scripts/package-mac.js",
+    "pack:win": "node ./scripts/package-win.js",
+    "pack:auto": "node ./scripts/package-auto.js"
   },
   "repository": {
     "type": "git",
