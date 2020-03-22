@@ -130,12 +130,12 @@ export function uploadPDF(LectureID: number, pdfPath: string): void {
  * @param API_Token
  */
 // tslint:disable-next-line:variable-name
-export function uploadTimestamps(LectureID: number, timestamps: string, API_Token: string): void {
+export function uploadTimestamps(LectureID: number, timestamps: string): void {
     const options = {
         method: "POST",
         url: `${PROTOCOL}://${SERVER}:${PORT}/api/${API_VERSION}/lecture/${LectureID}/timestamps`,
         headers: {
-            Authorization: `bearer ${API_Token}`
+            Authorization: `bearer ${apiToken}`
         },
         formData: {
             timestamps
@@ -157,13 +157,13 @@ export function uploadTimestamps(LectureID: number, timestamps: string, API_Toke
  * @return validity of token. Promise<boolean>
  */
 // tslint:disable-next-line:variable-name
-export async function checkToken(API_Token: string): Promise<boolean> {
+export async function checkToken(apiToken: string): Promise<boolean> {
     return new Promise(resolve => {
         const options = {
             method: "POST",
             url: `${PROTOCOL}://${SERVER}:${PORT}/oauth2/check_token`,
             headers: {
-                Authorization: `bearer ${API_Token}`
+                Authorization: `bearer ${apiToken}`
             }
         };
 
@@ -184,27 +184,37 @@ export async function checkToken(API_Token: string): Promise<boolean> {
 
 /**
  * Add lecture.
+ *
  * @param courseid
  * @param number of lecture
  * @param name titel of lecture
  * @param API_Token
+ *
+ * @return lecureID
  */
 // tslint:disable-next-line:variable-name
-export function addLecture(courseid: number, number: number, name: string, API_Token: string): void {
-    const options = {
-        method: "PUT",
-        url: `${PROTOCOL}://${SERVER}:${PORT}/api/${API_VERSION}/lecture`,
-        headers: {
-            Authorization: `bearer ${API_Token}`
-        },
-        body: JSON.stringify({ courseid, number, name })
-    };
+export async function addLecture(courseid: number, number: number, name: string): Promise<string> {
+    return new Promise(resolve => {
+        const options = {
+            method: "PUT",
+            url: `${PROTOCOL}://${SERVER}:${PORT}/api/${API_VERSION}/lecture`,
+            headers: {
+                Authorization: `bearer ${apiToken}`
+            },
+            body: JSON.stringify({ courseid, number, name })
+        };
 
-    request.post(options, (err, res, body) => {
-        if (err) {
-            return $.log(err);
-        }
-        $.log(`Status: ${res.statusCode}`);
-        $.log(body);
+        request.post(options, (err, res, body) => {
+            if (err) {
+                return $.log(err);
+            }
+            $.log(`Status: ${res.statusCode}`);
+            $.log(body);
+            resolve("test");
+        });
     });
 }
+/*
+generateToken("test", "passwort");
+addLecture(1, 1, "Paul der Käfer geht spazieren.");
+*/
