@@ -4,28 +4,41 @@ import { basename } from "path";
 import * as request from "request";
 import { TimeStamp } from "./recordingManager";
 
+// API version is used in request paths.
 export const API_VERSION = "v1";
 
+// API Server address.
 const SERVER = "covod.bre4k3r.de";
-const PORT = ""; // ${PROTOCOL} port. Mit doppelpunkt
 
+// At the moment no PORT necesessary.
+// If port should be used it needs to be set with :
+// e.g. ":5000"
+const PORT = "";
+
+// API Protocol. SSL supported.
 const PROTOCOL = "https";
 
+// API Token is automatically set on login by generateToken()
 // tslint:disable-next-line:no-var-keyword
-var apiToken: string;
+export var apiToken: string;
 
-//  we should get another one for our app.
+// Client ID and Secret hardcoded for this App.
+// Used in generateToken() request.
 const CLIENT_ID = "PPDPDvXf7bkd5bDLVhttUIxn";
 const CLIENT_SECRET = "qvU7ckxCxYZBNfIItVRtPp5mML9UxnTu4M31migU9FYXTj13";
 
 /**
  * Login and generate a token.
- * Returns true if login was correct and also sets apiToken.
- * @param username
- * @param password
+ * Auto sets apiToken on successful login.
+ *
+ * @param username to log in with.
+ * @param password for this user.
+ *
+ * @return Promise<boolean> true for successful login.
  */
 export async function generateToken(username: string, password: string): Promise<boolean> {
     return new Promise(resolve => {
+        // oauth2 auth request.
         const options = {
             method: "POST",
             url: `${PROTOCOL}://${SERVER}${PORT}/oauth2/token`,
@@ -38,27 +51,31 @@ export async function generateToken(username: string, password: string): Promise
                 scope: "upload view"
             }
         };
+
+        // place post request.
         request.post(options, (err, res, body) => {
             if (err) {
                 $.log(err);
             }
             const code = res.statusCode;
             $.log("Token Status:" + code);
+            // on successful login set apiToken and resolve true.
             if (code === 200) {
                 apiToken = JSON.parse(body).access_token;
                 resolve(true);
             }
+            // on unsuccessful auth resolve with false.
             resolve(false);
         });
     });
 }
 
 /**
- * Upload media files.
+ * Upload media files to server.
+ * Accepted are video and soundfiles.
  *
- * @param LectureID
- * @param mediaPath
- * @param API_Token
+ * @param LectureID gotten from addLecture()
+ * @param mediaPath to video or sound file.
  */
 // tslint:disable-next-line:variable-name
 export async function uploadMedia(LectureID: number, mediaPath: string): Promise<void> {
@@ -93,11 +110,10 @@ export async function uploadMedia(LectureID: number, mediaPath: string): Promise
 }
 
 /**
- * Upload PDF.
+ * Upload PDF to Server.
  *
- * @param LectureID
- * @param pdfPath
- * @param API_Token
+ * @param LectureID gotten by addListener() - should match with the media one.
+ * @param pdfPath to PDF.
  */
 // tslint:disable-next-line:variable-name
 export async function uploadPDF(LectureID: number, pdfPath: string): Promise<void> {
@@ -133,9 +149,12 @@ export async function uploadPDF(LectureID: number, pdfPath: string): Promise<voi
 
 /**
  * Upload timestam collection.
- * @param LectureID
- * @param timestamps
- * @param API_Token
+ *
+ * Timestamps collections keep information
+ * about when which pdf page is shown in the media.
+ *
+ * @param LectureID gotten from addLecture() matching with media / (pdf).
+ * @param timestampsare an array of json objects with keys: time, page.
  */
 // tslint:disable-next-line:variable-name
 export async function uploadTimestamps(LectureID: number, timestamps: TimeStamp[]): Promise<void> {
@@ -163,21 +182,28 @@ export async function uploadTimestamps(LectureID: number, timestamps: TimeStamp[
 }
 
 /**
- * Validate token. Aks server if token is still valid.
- * @param API_Token
+ * Validate a token.
+ * Ask server if API Token is still valid.
+ *
+ * @param API_Token token to test.
+ *
  * @return validity of token. Promise<boolean>
+ *          true if token valid.
+ *          false if token invalid.
  */
 // tslint:disable-next-line:variable-name
-export async function checkToken(apiToken: string): Promise<boolean> {
+export async function checkToken(API_Token: string): Promise<boolean> {
+    // oauth2 check token request.
     return new Promise(resolve => {
         const options = {
             method: "POST",
             url: `${PROTOCOL}://${SERVER}${PORT}/oauth2/check_token`,
             headers: {
-                Authorization: `bearer ${apiToken}`
+                Authorization: `bearer ${API_Token}`
             }
         };
 
+        // place post request.
         request.post(options, (err, res, body) => {
             if (err) {
                 $.log(err);
@@ -185,8 +211,11 @@ export async function checkToken(apiToken: string): Promise<boolean> {
             $.log(`Status: ${res.statusCode}`);
             $.log(body);
             if (res.statusCode === 200) {
+                // if status code is 200 which means success rsolve true.
                 resolve(true);
             } else {
+                // else resolve false.
+                // Non successful oauth request may expect status 401 Authentication Error.
                 resolve(false);
             }
         });
@@ -196,12 +225,11 @@ export async function checkToken(apiToken: string): Promise<boolean> {
 /**
  * Add lecture.
  *
- * @param courseid
- * @param number of lecture
- * @param name titel of lecture
- * @param API_Token
+ * @param courseid of professor.
+ * @param number of lecture.
+ * @param name titel of lecture.
  *
- * @return lecureID
+ * @return new lecureID.
  */
 // tslint:disable-next-line:variable-name
 export async function addLecture(course_id: number, number: number, name: string): Promise<number> {
@@ -217,6 +245,7 @@ export async function addLecture(course_id: number, number: number, name: string
             body: { course_id, number, name }
         };
 
+        // place put request.
         request.put(options, (err, res, body) => {
             if (err) {
                 $.log(err);
