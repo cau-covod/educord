@@ -68,7 +68,14 @@ class WindowManager {
                         click(): void {
                             app.quit();
                         }
-                    }
+                    },
+                    { type: "separator" },
+                    { label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:" },
+                    { label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:" },
+                    { label: "Cut", accelerator: "CmdOrCtrl+X", selector: "cut:" },
+                    { label: "Undo", accelerator: "CmdOrCtrl+Z", selector: "undo:" },
+                    { label: "Redo", accelerator: "Shift+CmdOrCtrl+Z", selector: "redo:" },
+                    { label: "Select All", accelerator: "CmdOrCtrl+A", selector: "selectAll:" }
                 ]
             }
         ];
@@ -119,6 +126,7 @@ class WindowManager {
                     }
                 ]
             },
+            { type: "separator" },
             {
                 label: "Upload",
                 submenu: [
@@ -139,7 +147,14 @@ class WindowManager {
                         click(): void {
                             pdfManager.selectPDF();
                         }
-                    }
+                    },
+                    { type: "separator" },
+                    { label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:" },
+                    { label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:" },
+                    { label: "Cut", accelerator: "CmdOrCtrl+X", selector: "cut:" },
+                    { label: "Undo", accelerator: "CmdOrCtrl+Z", selector: "undo:" },
+                    { label: "Redo", accelerator: "Shift+CmdOrCtrl+Z", selector: "redo:" },
+                    { label: "Select All", accelerator: "CmdOrCtrl+A", selector: "selectAll:" }
                 ]
             }
         ];
