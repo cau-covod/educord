@@ -216,7 +216,3 @@ export async function addLecture(course_id: number, number: number, name: string
         });
     });
 }
-
-// generateToken("test", "passwort");
-// $.log(apiToken);
-addLecture(1, 2, "Paul der Käfer geht spazieren.");
