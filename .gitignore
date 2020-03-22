@@ -4,3 +4,4 @@ build
 .DS_Store
 tmp
 package
+package-lock.json
