@@ -23,6 +23,11 @@ body {
     left: 20px;
 }
 
+#selectPdfBtn {
+    position: absolute;
+    right: 20px;
+}
+
 .nav-link {
     padding: 1px 5px !important;
 }

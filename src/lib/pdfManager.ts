@@ -1,4 +1,4 @@
-import { dialog, OpenDialogReturnValue } from "electron";
+import { dialog, OpenDialogReturnValue, ipcMain } from "electron";
 import { join } from "path";
 
 // tslint:disable-next-line:no-var-requires
@@ -9,6 +9,11 @@ const PdfWindow = require("electron-pdf-window");
  */
 class PDFManager {
     private pdfWindow: any;
+
+    constructor() {
+        // Bind on event, which gets fired in main window.
+        ipcMain.on("dialog:pdf:open", this.selectPDF.bind(this));
+    }
 
     /**
      * Select a PDF from the Filesystem.
@@ -27,8 +32,8 @@ class PDFManager {
     public loadPDF(pdf: OpenDialogReturnValue): void {
         if (!this.pdfWindow) {
             this.pdfWindow = new PdfWindow({
-                width: 600,
-                height: 800,
+                width: 800,
+                height: 600,
                 webPreferences: {
                     nodeIntegration: true
                 },

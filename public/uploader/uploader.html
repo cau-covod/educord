@@ -6,19 +6,31 @@
     <script src="../lib/bootstrap/js/bootstrap.js"></script>
     <script defer src="./uploader.js"></script>
     <script src="../lib/jquery.js"></script>
+    <title>EDUcord - Upload</title>
 </head>
 
 <body>
     <h2>Datei hochladen</h2>
-    <div class="form-group">
-        <div class="input-group input-file" name="file">
-            <input type="text" class="form-control" placeholder='W&auml;hle eine Datei aus...' />
-            <span class="input-group-btn">
-                <button class="btn btn-secondary btn-choose" type="button">Ausw&auml;hlen</button>
-            </span>
+    <form>
+        <div class="form-group">
+            <div class="input-group input-file" name="lecturename">
+                <input id="lectureNumberInput" type="text" class="form-control" placeholder="Lecture Number" required>
+
+                <input id="lectureNameInput" type="text" class="form-control" placeholder="Lecture Name" required>
+            </div><br>
+            <div class="input-group input-file" name="file">
+                <input id="filepath-hidden" type="text" hidden>
+                <input id="filename-field" type="text" class="form-control" placeholder='W&auml;hle eine Datei aus...'
+                    disabled required />
+
+            </div>
+            <div class="input-group-btn">
+                <button type="submit" id="file-choose-btn" class="btn btn-secondary btn-choose"
+                    type="button">Ausw&auml;hlen</button>
+            </div>
         </div>
-    </div>
-    <button class="btn btn-primary btn-block btn-login" type="submit">Hochladen</button>
+        <button id="upload-btn" class="btn btn-primary btn-block btn-login" type="submit">Hochladen</button>
+    </form>
 </body>
 
 </html>
