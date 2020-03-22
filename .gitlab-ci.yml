@@ -47,7 +47,10 @@ package:linux:
         - master
     stage: package
     script:
+        - apt-get update && apt-get install zip
         - npm run pack:linux
+        - cd package
+        - zip -9 -r linux.zip educord-linux-*
     cache:
         key: $CI_COMMIT_REF_SLUG
         paths:
@@ -55,14 +58,17 @@ package:linux:
         policy: pull-push
     artifacts:
         paths:
-            - package/
+            - package/linux.zip
 
 package:mac:
     only:
         - master
     stage: package
     script:
+        - apt-get update && apt-get install zip
         - npm run pack:mac
+        - cd package
+        - zip -9 -r mac.zip educord-darwin-*
     cache:
         key: $CI_COMMIT_REF_SLUG
         paths:
@@ -70,4 +76,4 @@ package:mac:
         policy: pull-push
     artifacts:
         paths:
-            - package/
+            - package/mac.zip
