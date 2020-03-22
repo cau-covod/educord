@@ -5,7 +5,7 @@ const options = {
     appBundleId: "EDUcord",
     arch: ["x64", "ia32"],
     dir: ".",
-    executableName: "EDUCord",
+    executableName: "EDUcord",
     out: "./package",
     platform: ["linux"],
     overwrite: true

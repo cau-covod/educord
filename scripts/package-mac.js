@@ -6,7 +6,7 @@ const options = {
     arch: ["x64", "ia32"],
     dir: ".",
     icon: __dirname + "/../img/icon.icns",
-    executableName: "EDUCord",
+    executableName: "EDUcord",
     out: "./package",
     platform: ["darwin"],
     overwrite: true

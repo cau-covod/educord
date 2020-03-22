@@ -45,8 +45,6 @@ lint:
 package:linux:
     only:
         - master
-    tags:
-        - deploy
     stage: package
     script:
         - npm run pack:linux
@@ -62,8 +60,6 @@ package:linux:
 package:mac:
     only:
         - master
-    tags:
-        - deploy
     stage: package
     script:
         - npm run pack:mac
