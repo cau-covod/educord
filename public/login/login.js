@@ -1,6 +1,7 @@
 const { ipcRenderer } = require("electron");
 
 const form = document.getElementById("login-form");
+const alert = document.getElementById("wrong-login-alert");
 
 /**
  * Attach listener to submit event of login-form.
@@ -10,10 +11,9 @@ form.addEventListener("submit", (el, evt) => {
 
     const $mail = document.getElementById("inputEmail");
     const $password = document.getElementById("inputPassword");
-
     ipcRenderer.send("login:submit", {
-        username: $mail,
-        pasword: $password
+        username: $mail.value,
+        password: $password.value
     });
 });
 
@@ -23,5 +23,7 @@ form.addEventListener("submit", (el, evt) => {
 ipcRenderer.on("login:response", (evt, arg) => {
     if (arg.success) {
         window.location.replace("../main/main.html");
+    } else {
+        alert.classList.add("show");
     }
 });

@@ -5,38 +5,51 @@ import * as request from "request";
 
 // TODO fill out
 export const API_VERSION = "v1";
-// export const SERVER = "covod.bre4k3r.de"; // put server domain here.
-export const SERVER = "localhost";
-export const PORT = "5000"; // https port.
+
+const SERVER = "covod.bre4k3r.de"; // put server domain here.
+// export const SERVER = "localhost";
+const PORT = "22022"; // ${PROTOCOL} port.
+
+const PROTOCOL = "http";
+
+let apiToken: string;
+
+//  we should get another one for our app.
+const CLIENT_ID = "PPDPDvXf7bkd5bDLVhttUIxn";
+const CLIENT_SECRET = "qvU7ckxCxYZBNfIItVRtPp5mML9UxnTu4M31migU9FYXTj13";
 
 /**
  * Login and generate a token.
- *
+ * Returns true if login was correct and also sets apiToken.
  * @param username
  * @param password
- * @param client_id
- * @param client_secret
  */
-// tslint:disable-next-line:variable-name
-export function generateToken(username: string, password: string, client_id: string, client_secret: string): any {
-    const options = {
-        method: "POST",
-        url: `http://${SERVER}:${PORT}/oauth2/token`,
-        formData: {
-            grant_type: "password",
-            client_id,
-            username,
-            password,
-            client_secret,
-            scope: "upload view"
-        }
-    };
-    request.post(options, (err, res, body) => {
-        if (err) {
-            return $.log(err);
-        }
-        $.log(`Status: ${res.statusCode}`);
-        $.log(body);
+export async function generateToken(username: string, password: string): Promise<boolean> {
+    return new Promise(resolve => {
+        const options = {
+            method: "POST",
+            url: `${PROTOCOL}://${SERVER}:${PORT}/oauth2/token`,
+            formData: {
+                grant_type: "password",
+                client_id: CLIENT_ID,
+                username,
+                password,
+                client_secret: CLIENT_SECRET,
+                scope: "upload view"
+            }
+        };
+        request.post(options, (err, res, body) => {
+            if (err) {
+                return $.log(err);
+            }
+            const code = res.statusCode;
+            $.log("Status:" + code);
+            if (code === 200) {
+                apiToken = body.access_token;
+                resolve(true);
+            }
+            resolve(false);
+        });
     });
 }
 
@@ -48,12 +61,12 @@ export function generateToken(username: string, password: string, client_id: str
  * @param API_Token
  */
 // tslint:disable-next-line:variable-name
-export function uploadMedia(LectureID: number, mediaPath: string, API_Token: string): void {
+export function uploadMedia(LectureID: number, mediaPath: string): void {
     const options = {
         method: "POST",
-        url: `http://${SERVER}:${PORT}/api/${API_VERSION}/lecture/${LectureID}/media`,
+        url: `${PROTOCOL}://${SERVER}:${PORT}/api/${API_VERSION}/lecture/${LectureID}/media`,
         headers: {
-            Authorization: `bearer ${API_Token}`
+            Authorization: `bearer ${apiToken}`
         },
         formData: {
             file: {
@@ -83,12 +96,12 @@ export function uploadMedia(LectureID: number, mediaPath: string, API_Token: str
  * @param API_Token
  */
 // tslint:disable-next-line:variable-name
-export function uploadPDF(LectureID: number, pdfPath: string, API_Token: string): void {
+export function uploadPDF(LectureID: number, pdfPath: string): void {
     const options = {
         method: "POST",
-        url: `http://${SERVER}:${PORT}/api/${API_VERSION}/lecture/${LectureID}/pdf`,
+        url: `${PROTOCOL}://${SERVER}:${PORT}/api/${API_VERSION}/lecture/${LectureID}/pdf`,
         headers: {
-            Authorization: `bearer ${API_Token}`
+            Authorization: `bearer ${apiToken}`
         },
         formData: {
             file: {
@@ -120,7 +133,7 @@ export function uploadPDF(LectureID: number, pdfPath: string, API_Token: string)
 export function uploadTimestamps(LectureID: number, timestamps: string, API_Token: string): void {
     const options = {
         method: "POST",
-        url: `http://${SERVER}:${PORT}/api/${API_VERSION}/lecture/${LectureID}/timestamps`,
+        url: `${PROTOCOL}://${SERVER}:${PORT}/api/${API_VERSION}/lecture/${LectureID}/timestamps`,
         headers: {
             Authorization: `bearer ${API_Token}`
         },
@@ -148,7 +161,7 @@ export async function checkToken(API_Token: string): Promise<boolean> {
     return new Promise(resolve => {
         const options = {
             method: "POST",
-            url: `http://${SERVER}:${PORT}/oauth2/check_token`,
+            url: `${PROTOCOL}://${SERVER}:${PORT}/oauth2/check_token`,
             headers: {
                 Authorization: `bearer ${API_Token}`
             }
@@ -180,7 +193,7 @@ export async function checkToken(API_Token: string): Promise<boolean> {
 export function addLecture(courseid: number, number: number, name: string, API_Token: string): void {
     const options = {
         method: "PUT",
-        url: `http://${SERVER}:${PORT}/api/${API_VERSION}/lecture`,
+        url: `${PROTOCOL}://${SERVER}:${PORT}/api/${API_VERSION}/lecture`,
         headers: {
             Authorization: `bearer ${API_Token}`
         },
