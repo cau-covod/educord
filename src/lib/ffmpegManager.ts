@@ -34,9 +34,12 @@ export default function initFFMPEG(): void {
             await worker.load();
             await worker.write(ffmpegVideo, tmpVideoFile);
             await worker.write(ffmpegAudio, tmpAudioFile);
-            await worker.run(`-i ${ffmpegVideo} -i ${ffmpegAudio} -c copy -strict experimental ${finalVideo}`, {
-                output: finalVideo
-            });
+            await worker.run(
+                `-i ${ffmpegVideo} -i ${ffmpegAudio} -c:v copy -c:a aac -strict experimental ${finalVideo}`,
+                {
+                    output: finalVideo
+                }
+            );
             await worker.remove(ffmpegVideo);
             await worker.remove(ffmpegAudio);
             const test = await worker.read(finalVideo);
