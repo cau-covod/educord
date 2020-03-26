@@ -57,7 +57,7 @@ export class ApiManager {
      * local CoVoD backend under the default configuration.
      */
     public static createLocal(): ApiManager {
-        return new ApiManager({ hostname: "localhost", port: "80", secure: false });
+        return new ApiManager({ hostname: "localhost", port: "5000", secure: false });
     }
 
     // API Server address.
