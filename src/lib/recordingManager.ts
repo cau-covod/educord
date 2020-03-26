@@ -12,7 +12,7 @@ export interface TimeStamp {
 /**
  * Class for managing the recording of timestamps etc.
  */
-class RecordingManager {
+export class RecordingManager {
     private timer = 0;
     private recording = false;
 
@@ -98,5 +98,3 @@ class RecordingManager {
         setTimeout(this.increaseTimer.bind(this), 1000);
     }
 }
-
-export default new RecordingManager();

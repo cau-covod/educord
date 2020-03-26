@@ -1,17 +1,20 @@
-import { BrowserWindow, ipcMain, IpcMainEvent, dialog } from "electron";
+import { BrowserWindow, dialog, ipcMain, IpcMainEvent } from "electron";
 import { existsSync } from "fs";
 import $ from "logsen";
 import { join, sep } from "path";
 import { rootDir } from "../index";
-import { addLecture, uploadMedia, uploadTimestamps } from "./APIHandler";
+import { ApiManager } from "./apiManager";
 
 /**
  * Class for managing the file-upload.
  */
-class UploadManager {
+export class UploadManager {
     private window!: BrowserWindow | null;
+    private apiManager: ApiManager;
 
-    constructor() {
+    constructor(apiManager: ApiManager) {
+        this.apiManager = apiManager;
+
         // bind to video upload submit
         ipcMain.on("video:upload:submit", this.handleVideoUploadClick.bind(this));
 
@@ -48,13 +51,13 @@ class UploadManager {
 
         try {
             // Create a new lecture
-            const lectureID = await addLecture(1, lectureNumber, lectureName);
+            const lectureID = await this.apiManager.addLecture(1, lectureNumber, lectureName);
             // Upload the video for the lecture
-            await uploadMedia(lectureID, filePath);
+            await this.apiManager.uploadMedia(lectureID, filePath);
 
             // If existing, upload the timestamps for the lecture
             if (timeStamps) {
-                await uploadTimestamps(lectureID, timeStamps);
+                await this.apiManager.uploadTimestamps(lectureID, timeStamps);
             }
 
             // Show message, if upload didnt throw an error
@@ -100,5 +103,3 @@ class UploadManager {
         this.window.show();
     }
 }
-
-export default new UploadManager();

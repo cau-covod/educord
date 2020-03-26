@@ -7,7 +7,7 @@ const PdfWindow = require("electron-pdf-window");
 /**
  * Class for managing the PDF-View.
  */
-class PDFManager {
+export class PDFManager {
     private pdfWindow: any;
 
     constructor() {
@@ -44,5 +44,3 @@ class PDFManager {
         this.pdfWindow.loadURL(file);
     }
 }
-
-export default new PDFManager();
