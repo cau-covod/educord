@@ -1,20 +1,26 @@
 import { app, BrowserWindow, Menu } from "electron";
 import path from "path";
 import { rootDir } from "./../index";
-import initFFMPEG from "./ffmpegManager";
-import loginManager from "./loginManager";
-import pdfManager from "./pdfManager";
-import recordingManager from "./recordingManager";
-import uploadManager from "./uploadManager";
+import { ApiManager } from "./apiManager";
+import { initFFMPEG } from "./ffmpegManager";
+import { LoginManager } from "./loginManager";
+import { PDFManager } from "./pdfManager";
+import { RecordingManager } from "./recordingManager";
+import { UploadManager } from "./uploadManager";
 
 /**
  * Class for managing our windows.
  */
-class WindowManager {
+export class WindowManager {
     /**
      * Main-Window of the application.
      */
     private mainWindow!: BrowserWindow;
+
+    private apiManager = ApiManager.createRemote();
+    private pdfManager = new PDFManager();
+    private recordingManager = new RecordingManager();
+    private uploadManager = new UploadManager(this.apiManager);
 
     /**
      * Start the window-manager.
@@ -23,7 +29,10 @@ class WindowManager {
         // Initialize window, when application is ready
         app.whenReady().then(() => {
             this.mainWindow = this.createWindow();
-            loginManager.init();
+
+            // Login manager constructor has side effects that bind to IPC events
+            // tslint:disable-next-line:no-unused-expression
+            new LoginManager(this, this.pdfManager, this.apiManager);
 
             this.mainWindow.on("closed", () => {
                 app.quit();
@@ -31,7 +40,7 @@ class WindowManager {
 
             this.initializeMenu();
             initFFMPEG();
-            recordingManager.init();
+            this.recordingManager.init();
         });
     }
 
@@ -112,6 +121,10 @@ class WindowManager {
      * Set menu after login.
      */
     public setRealMainMenu(): void {
+        // Bind managers since 'this' changes inside the menu handlers
+        const uploadManager = this.uploadManager;
+        const pdfManager = this.pdfManager;
+
         // Store menu-template in any-array, so we can add an empty object for MacOS
         const mainMenuTemplate: any[] = [
             {
@@ -187,9 +200,3 @@ class WindowManager {
         Menu.setApplicationMenu(Menu.buildFromTemplate(mainMenuTemplate));
     }
 }
-
-/**
- * Export the WindowManager as a singleton.
- * To start the the application, run WindowManager.start().
- */
-export default new WindowManager();

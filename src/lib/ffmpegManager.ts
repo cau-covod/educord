@@ -9,7 +9,7 @@ const { createWorker } = require("@ffmpeg/ffmpeg");
 /**
  * Initialize our "serverside" FFMPEG-Processing.
  */
-export default function initFFMPEG(): void {
+export function initFFMPEG(): void {
     /**
      * Listen to information about the encoded files being send.
      */

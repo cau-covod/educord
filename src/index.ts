@@ -1,4 +1,4 @@
-import windowManager from "./lib/windowManager";
+import { WindowManager } from "./lib/windowManager";
 
 // Set ENV to production
 process.env.NODE_ENV = "production";
@@ -7,7 +7,7 @@ process.env.NODE_ENV = "production";
  * Initial function of our application.
  */
 (() => {
-    windowManager.start();
+    new WindowManager().start();
 })();
 
 /**
