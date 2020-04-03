@@ -1,7 +1,7 @@
 import { createReadStream } from "fs";
 import $ from "logsen";
 import { basename } from "path";
-import * as request from "request";
+import request from "request";
 import { TimeStamp } from "./recordingManager";
 
 /**
@@ -30,6 +30,14 @@ export interface ApiManagerOptions {
 export interface ApiManagerCredentials {
     username: string;
     password: string;
+}
+
+/**
+ * The response of a request.
+ */
+interface RequestResult {
+    response: request.Response;
+    body: any;
 }
 
 /**
@@ -118,78 +126,39 @@ export class ApiManager {
      * Generate a new token for the API.
      */
     private async generateToken({ username, password }: ApiManagerCredentials): Promise<string> {
-        return new Promise((resolve, reject) => {
-            // oauth2 auth request.
-            const options = {
-                method: "POST",
-                url: `${this.protocol}://${this.hostname}:${this.port}/oauth2/token`,
-                formData: {
-                    grant_type: "password",
-                    client_id: ApiManager.clientID,
-                    username,
-                    password,
-                    client_secret: ApiManager.clientSecret,
-                    scope: "upload view"
-                }
-            };
-
-            // place post request.
-            request.post(options, (err, res, body) => {
-                if (err) {
-                    $.log(err);
-                }
-                const code = res.statusCode;
-                $.log("Token Status:" + code);
-                // on successful login set apiToken and resolve true.
-                if (code === 200) {
-                    resolve(JSON.parse(body).access_token);
-                }
-                // on unsuccessful auth resolve with false.
-                reject();
-            });
+        const result = await this.performRequest("POST", "/oauth2/token", {
+            formData: {
+                grant_type: "password",
+                client_id: ApiManager.clientID,
+                username,
+                password,
+                client_secret: ApiManager.clientSecret,
+                scope: "upload view"
+            },
+            json: true
         });
+        const status = result.response.statusCode;
+        if (status === 200) {
+            return result.body;
+        } else {
+            throw new Error(`Could not generate token, got status ${status}`);
+        }
     }
 
     /**
      * Upload a new video to the API.
      */
     public async uploadMedia(lectureID: number, mediaPath: string): Promise<void> {
-        if (!this.connected) {
-            throw new Error("Not connected to API");
-        }
-        if (!(await this.checkToken(this.apiToken))) {
-            if (!(await this.connect())) {
-                throw new Error("Unable to connect to API!");
-            }
-        }
-
-        return new Promise((resolve, reject) => {
-            const options = {
-                method: "POST",
-                url: `${this.protocol}://${this.hostname}:${this.port}/api/${ApiManager.apiVersion}/lecture/${lectureID}/media`,
-                headers: {
-                    Authorization: `bearer ${this.apiToken}`
-                },
-                formData: {
-                    file: {
-                        value: createReadStream(mediaPath),
-                        options: {
-                            filename: basename(mediaPath),
-                            contentType: null
-                        }
+        return this.performApiRequest("POST", `/lecture/${lectureID}/media`, {
+            formData: {
+                file: {
+                    value: createReadStream(mediaPath),
+                    options: {
+                        filename: basename(mediaPath),
+                        contentType: null
                     }
                 }
-            };
-
-            request.post(options, (err, res, body) => {
-                if (err) {
-                    $.log(err);
-                    reject();
-                }
-                $.log(`Status: ${res.statusCode}`);
-                $.log(body);
-                resolve();
-            });
+            }
         });
     }
 
@@ -197,78 +166,25 @@ export class ApiManager {
      * Upload a pdf for an existing lecture.
      */
     public async uploadPDF(lectureID: number, pdfPath: string): Promise<void> {
-        if (!this.connected) {
-            throw new Error("Not connected to API");
-        }
-        if (!(await this.checkToken(this.apiToken))) {
-            if (!(await this.connect())) {
-                throw new Error("Unable to connect to API!");
-            }
-        }
-
-        return new Promise((resolve, reject) => {
-            const options = {
-                method: "POST",
-                url: `${this.protocol}://${this.hostname}:${this.port}/api/${ApiManager.apiVersion}/lecture/${lectureID}/pdf`,
-                headers: {
-                    Authorization: `bearer ${this.apiToken}`
-                },
-                formData: {
-                    file: {
-                        value: createReadStream(pdfPath),
-                        options: {
-                            filename: basename(pdfPath),
-                            contentType: null
-                        }
+        return this.performApiRequest("POST", `/lecture/${lectureID}/pdf`, {
+            formData: {
+                file: {
+                    value: createReadStream(pdfPath),
+                    options: {
+                        filename: basename(pdfPath),
+                        contentType: null
                     }
                 }
-            };
-
-            request.post(options, (err, res, body) => {
-                if (err) {
-                    $.log(err);
-                    reject();
-                }
-                $.log(`Status: ${res.statusCode}`);
-                $.log(body);
-                resolve();
-            });
+            }
         });
     }
 
     /**
      * Upload the timestamp for an existing lecture.
      */
-    public async uploadTimestamps(LectureID: number, timestamps: TimeStamp[]): Promise<void> {
-        if (!this.connected) {
-            throw new Error("Not connected to API");
-        }
-        if (!(await this.checkToken(this.apiToken))) {
-            if (!(await this.connect())) {
-                throw new Error("Unable to connect to API!");
-            }
-        }
-
-        return new Promise((resolve, reject) => {
-            const options = {
-                method: "POST",
-                url: `${this.protocol}://${this.hostname}:${this.port}/api/${ApiManager.apiVersion}/lecture/${LectureID}/timestamps`,
-                headers: {
-                    Authorization: `bearer ${this.apiToken}`
-                },
-                json: true,
-                body: timestamps
-            };
-
-            request.post(options, (err, res, body) => {
-                if (err) {
-                    $.log(err);
-                    reject();
-                }
-                $.log(`Status: ${res.statusCode}`);
-                $.log(body);
-                resolve();
-            });
+    public async uploadTimestamps(lectureID: number, timestamps: TimeStamp[]): Promise<void> {
+        return this.performApiRequest("POST", `/lecture/${lectureID}/timestamps`, {
+            json: timestamps
         });
     }
 
@@ -276,6 +192,16 @@ export class ApiManager {
      * Add a new lecture.
      */
     public async addLecture(courseID: number, lectureNumber: number, name: string): Promise<number> {
+        const body = await this.performApiRequest("PUT", "/lecture/0", {
+            json: { course_id: courseID, number: lectureNumber, name }
+        });
+        return body.id;
+    }
+
+    /**
+     * Performs an API request. Non-200-requests translate into an error.
+     */
+    private async performApiRequest(method = "POST", endpoint: string, otherOptions: any): Promise<any> {
         if (!this.connected) {
             throw new Error("Not connected to API");
         }
@@ -285,28 +211,23 @@ export class ApiManager {
             }
         }
 
-        return new Promise((resolve, reject) => {
-            const options = {
-                method: "PUT",
-                json: true,
-                url: `${this.protocol}://${this.hostname}:${this.port}/api/${ApiManager.apiVersion}/lecture/0`,
-                headers: {
-                    Authorization: `bearer ${this.apiToken}`,
-                    contentType: "application/json"
-                },
-                body: { course_id: courseID, number: lectureNumber, name }
-            };
+        const requestOptions = {
+            headers: {
+                Authorization: `bearer ${this.apiToken}`
+            }
+        };
+        Object.assign(requestOptions, otherOptions);
 
-            // place put request.
-            request.put(options, (err, res, body) => {
-                if (err) {
-                    $.log(err);
-                    reject();
-                }
-                $.log(`Status: ${res.statusCode}`);
-                resolve(body.id);
-            });
-        });
+        const result = await this.performRequest(method, `/api/${ApiManager.apiVersion}${endpoint}`, requestOptions);
+        const status = result.response.statusCode;
+
+        $.log(`${endpoint} -> Status ${status}`);
+
+        if (status < 400) {
+            return result.body;
+        } else {
+            throw new Error(`${endpoint} returned status ${status}`);
+        }
     }
 
     /**
@@ -314,30 +235,35 @@ export class ApiManager {
      */
     public async checkToken(tokenToCheck: string): Promise<boolean> {
         // oauth2 check token request.
+        const result = await this.performRequest("POST", "/oauth2/check_token", {
+            headers: {
+                Authorization: `bearer ${tokenToCheck}`
+            }
+        });
+        return result.response.statusCode === 200;
+    }
+
+    /**
+     * Performs an HTTP-request and returns a promise.
+     *
+     * @param method the HTTP method
+     * @param path the endpoint on the server
+     * @param otherOptions other options to pass to 'request'
+     */
+    private async performRequest(method: string, path: string, otherOptions: any): Promise<RequestResult> {
         return new Promise((resolve, reject) => {
             const options = {
-                method: "POST",
-                url: `${this.protocol}://${this.hostname}:${this.port}/oauth2/check_token`,
-                headers: {
-                    Authorization: `bearer ${tokenToCheck}`
-                }
+                method,
+                url: `${this.protocol}://${this.hostname}:${this.port}${path}`
             };
+            Object.assign(options, otherOptions);
 
-            // place post request.
-            request.post(options, (err, res, body) => {
+            request(options, (err, res, body) => {
                 if (err) {
                     $.log(err);
                     reject(err);
-                }
-                $.log(`Status: ${res.statusCode}`);
-                $.log(body);
-                if (res.statusCode === 200) {
-                    // if status code is 200 which means success rsolve true.
-                    resolve(true);
                 } else {
-                    // else resolve false.
-                    // Non successful oauth request may expect status 401 Authentication Error.
-                    resolve(false);
+                    resolve({ response: res, body });
                 }
             });
         });

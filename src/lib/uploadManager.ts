@@ -52,16 +52,23 @@ export class UploadManager {
         try {
             // Create a new lecture
             const lectureID = await this.apiManager.addLecture(1, lectureNumber, lectureName);
+
+            // Store promises in array to resolve them later
+            const promises: Promise<void>[] = [];
+
             // Upload the video for the lecture
-            await this.apiManager.uploadMedia(lectureID, filePath);
+            promises.push(this.apiManager.uploadMedia(lectureID, filePath));
 
             // If existing, upload the timestamps for the lecture
             if (timeStamps) {
-                await this.apiManager.uploadTimestamps(lectureID, timeStamps);
+                promises.push(this.apiManager.uploadTimestamps(lectureID, timeStamps));
             }
 
+            // Await all promises at once to save time during upload
+            await Promise.all(promises);
+
             // Show message, if upload didnt throw an error
-            dialog.showMessageBox((null as unknown) as BrowserWindow, {
+            await dialog.showMessageBox((null as unknown) as BrowserWindow, {
                 type: "info",
                 buttons: ["Ok"],
                 defaultId: 0,
@@ -71,13 +78,13 @@ export class UploadManager {
             });
         } catch (e) {
             // Show error-message, if upload threw an error
-            dialog.showMessageBox((null as unknown) as BrowserWindow, {
+            await dialog.showMessageBox((null as unknown) as BrowserWindow, {
                 type: "error",
                 buttons: ["Ok"],
                 defaultId: 0,
                 title: "Upload failed",
                 message: "Upload failed",
-                detail: e
+                detail: `${e}`
             });
             $.err(e);
         }
